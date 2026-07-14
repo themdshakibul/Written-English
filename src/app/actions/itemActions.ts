@@ -2,24 +2,19 @@
 
 import connectToDatabase from "@/lib/mongodb";
 import Item from "@/models/Item";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-// Global mock storage as fallback if MongoDB is not connected
-let mockItems: any[] = [
-  {
-    _id: "1",
-    title: "Demo SaaS App",
-    shortDescription: "A great demo app",
-    fullDescription: "A full description of the demo app...",
-    price: 99,
-    date: "2026-07-14",
-    category: "Software",
-    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800",
-    rating: 4.5
-  }
-];
+async function getUserId(): Promise<string | null> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  return session?.user?.id || null;
+}
 
 export async function addItem(formData: FormData) {
+  const userId = await getUserId();
+  if (!userId) return { success: false, error: "Not authenticated" };
+
   const db = await connectToDatabase();
   
   const newItem = {
@@ -30,18 +25,12 @@ export async function addItem(formData: FormData) {
     date: formData.get("date") as string,
     category: formData.get("category") as string,
     imageUrl: formData.get("imageUrl") as string,
+    userId,
   };
 
   if (db) {
     const item = new Item(newItem);
     await item.save();
-  } else {
-    // Fallback to mock data for demonstration purposes
-    mockItems.push({
-      _id: Math.random().toString(36).substr(2, 9),
-      ...newItem,
-      rating: 0
-    });
   }
 
   revalidatePath("/items/manage");
@@ -50,15 +39,17 @@ export async function addItem(formData: FormData) {
 }
 
 export async function getUserItems() {
+  const userId = await getUserId();
+  if (!userId) return [];
+
   const db = await connectToDatabase();
   
   if (db) {
-    const items = await Item.find({ userId: "demo-user-123" }).sort({ createdAt: -1 });
+    const items = await Item.find({ userId }).sort({ createdAt: -1 });
     return JSON.parse(JSON.stringify(items));
   }
   
-  // Fallback
-  return mockItems;
+  return [];
 }
 
 export async function deleteItem(id: string) {
@@ -66,8 +57,6 @@ export async function deleteItem(id: string) {
   
   if (db) {
     await Item.findByIdAndDelete(id);
-  } else {
-    mockItems = mockItems.filter(item => item._id !== id);
   }
 
   revalidatePath("/items/manage");

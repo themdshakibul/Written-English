@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +12,7 @@ import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { GitFork } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -19,6 +21,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
+  const [error, setError] = useState("");
   
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -28,12 +31,18 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof loginSchema>) => {
-    console.log("Login data:", data);
-    // Dummy authentication logic for the Next.js middleware to pick up
-    document.cookie = "auth-token=demo-token; path=/";
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+    setError("");
+    const { error: signInError } = await authClient.signIn.email({
+      email: data.email,
+      password: data.password,
+    });
+    if (signInError) {
+      setError(signInError.message || signInError.statusText || "Invalid email or password");
+      return;
+    }
     router.push("/explore");
-    router.refresh(); // Force refresh to update Navbar state
+    router.refresh();
   };
 
   const handleDemoLogin = () => {
@@ -132,6 +141,9 @@ export default function LoginPage() {
                 )}
               </div>
 
+              {error && (
+                <p className="text-[0.8rem] font-medium text-destructive text-center">{error}</p>
+              )}
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
               </Button>

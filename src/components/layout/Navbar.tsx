@@ -7,14 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useTheme } from "next-themes";
 import { useState, useEffect, useRef } from "react";
+import { authClient, useSession } from "@/lib/auth-client";
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const isLoggedIn = !!session;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -28,7 +31,6 @@ export function Navbar() {
 
   useEffect(() => {
     setMounted(true);
-    setIsLoggedIn(document.cookie.includes("auth-token=demo-token"));
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
@@ -139,8 +141,8 @@ export function Navbar() {
                   </Link>
                   <div className="border-t border-border mt-1 pt-1">
                     <button
-                      onClick={() => {
-                        document.cookie = "auth-token=; path=/; max-age=0";
+                      onClick={async () => {
+                        await authClient.signOut();
                         setDropdownOpen(false);
                         window.location.href = "/";
                       }}
@@ -197,8 +199,8 @@ export function Navbar() {
                     <Button
                       variant="destructive"
                       className="w-full justify-center"
-                      onClick={() => {
-                        document.cookie = "auth-token=; path=/; max-age=0";
+                      onClick={async () => {
+                        await authClient.signOut();
                         window.location.href = "/";
                       }}
                     >

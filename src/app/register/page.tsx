@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +12,7 @@ import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { GitFork } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -20,7 +22,8 @@ const registerSchema = z.object({
 
 export default function RegisterPage() {
   const router = useRouter();
-  
+  const [error, setError] = useState("");
+
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -30,17 +33,26 @@ export default function RegisterPage() {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof registerSchema>) => {
-    console.log("Registration data:", data);
-    document.cookie = "auth-token=demo-token; path=/";
-    router.push("/explore");
+  const onSubmit = async (data: z.infer<typeof registerSchema>) => {
+    setError("");
+    const { error: signUpError } = await authClient.signUp.email({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    });
+    if (signUpError) {
+      setError(signUpError.message || signUpError.statusText || "Registration failed");
+      return;
+    }
+    router.push("/");
     router.refresh();
   };
+
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      
+
       <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md border-border/60 shadow-lg">
           <CardHeader className="space-y-1 text-center">
@@ -77,7 +89,7 @@ export default function RegisterPage() {
                 GitHub
               </Button>
             </div>
-            
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
@@ -123,7 +135,7 @@ export default function RegisterPage() {
                   </p>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none" htmlFor="password">
                   Password
@@ -140,12 +152,15 @@ export default function RegisterPage() {
                 )}
               </div>
 
+              {error && (
+                <p className="text-[0.8rem] font-medium text-destructive text-center">{error}</p>
+              )}
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Creating account..." : "Create Account"}
               </Button>
             </form>
           </CardContent>
-          
+
           <CardFooter className="flex flex-col border-t border-border/50 px-6 py-4">
             <div className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}

@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { House, LayoutDashboard, BarChart3, Package, Plus, User, LogOut, Menu, X, ChevronRight } from "lucide-react"
+import { authClient, useSession } from "@/lib/auth-client"
 
 const sidebarLinks = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -16,6 +17,8 @@ const sidebarLinks = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { data: session } = useSession()
+  const user = session?.user
 
   return (
     <div className="flex min-h-screen">
@@ -46,11 +49,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* User profile */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shrink-0">
-            JD
+            {user?.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-medium truncate">John Doe</p>
-            <p className="text-xs text-muted-foreground truncate">john@example.com</p>
+            <p className="text-sm font-medium truncate">{user?.name || "User"}</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
           </div>
         </div>
 
@@ -87,8 +90,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             Back to Home
           </Link>
           <button
-            onClick={() => {
-              document.cookie = "auth-token=; path=/; max-age=0"
+            onClick={async () => {
+              await authClient.signOut()
               window.location.href = "/"
             }}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"

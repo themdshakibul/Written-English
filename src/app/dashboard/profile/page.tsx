@@ -5,15 +5,18 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
-  User, Mail, Save, Shield, Bell, Palette, Globe, Calendar,
+  User, Mail, Save, Shield, Bell, Palette, Globe,
   Camera, Check, X, Phone, MapPin, Link as LinkIcon,
 } from "lucide-react"
+import { useSession } from "@/lib/auth-client"
 
 export default function ProfilePage() {
+  const { data: session } = useSession()
+  const user = session?.user
+  const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "U"
   return (
     <>
       {/* Cover */}
@@ -27,7 +30,7 @@ export default function ProfilePage() {
           <div className="relative group">
             <Avatar className="h-28 w-28 ring-4 ring-background shadow-xl">
               <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white text-3xl font-bold">
-                JD
+                {initials}
               </AvatarFallback>
             </Avatar>
             <button className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
@@ -37,10 +40,10 @@ export default function ProfilePage() {
           <div className="flex-1 min-w-0 pb-1">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">John Doe</h1>
+                <h1 className="text-2xl font-bold tracking-tight">{user?.name || "User"}</h1>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-0.5">
                   <Mail className="h-3.5 w-3.5" />
-                  john@example.com
+                  {user?.email || ""}
                 </div>
               </div>
               <Badge variant="outline" className="sm:ml-auto gap-1.5 px-3 py-1 text-xs w-fit">

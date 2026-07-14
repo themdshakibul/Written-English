@@ -1,5 +1,6 @@
 import connectToDatabase from "@/lib/mongodb";
 import Item from "@/models/Item";
+import Payment from "@/models/Payment";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -27,6 +28,7 @@ export async function POST(req: Request) {
 
     const checkout = await stripe.checkout.sessions.create({
       mode: "payment",
+      customer_email: session.user.email,
       line_items: [
         {
           price_data: {
@@ -50,6 +52,22 @@ export async function POST(req: Request) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/cancel`,
     });
+
+    // Save purchase immediately so it shows up regardless of webhook
+    try {
+      await Payment.create({
+        itemId: String(item._id),
+        itemName: (item.title as string) || "Unknown",
+        userId: session.user.id,
+        userEmail: session.user.email || "",
+        amount: (item.price as number) || 0,
+        currency: "usd",
+        stripeSessionId: checkout.id,
+        status: "completed",
+      });
+    } catch {
+      // webhook will create it if local save fails
+    }
 
     return NextResponse.json({ url: checkout.url });
   } catch (err) {

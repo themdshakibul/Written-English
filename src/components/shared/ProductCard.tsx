@@ -1,9 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Star, ArrowUpRight, Heart } from "lucide-react";
 
 export interface ProductData {
   id: string;
@@ -23,83 +23,111 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   return (
-    <Card className="group flex flex-col h-full overflow-hidden border border-border/40 bg-card transition-all duration-500 hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)] hover:border-primary/20 hover:-translate-y-1.5">
-      <div className="relative w-full aspect-[4/3] overflow-hidden bg-muted">
-        <Image
-          src={product.imageUrl}
-          alt={product.title}
-          fill
-          className="object-cover transition-all duration-700 group-hover:scale-110"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        <Badge className="absolute top-3 left-3 shadow-sm bg-white/90 backdrop-blur-md text-foreground border-0 text-xs font-medium">
-          {product.category}
-        </Badge>
-        <div className="absolute top-3 right-3 flex items-center gap-1 text-xs font-semibold text-amber-500 bg-amber-500/10 backdrop-blur-md px-2 py-1 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          {product.rating.toFixed(1)}
-        </div>
-      </div>
-      
-      <CardContent className="flex-grow p-5 flex flex-col gap-2.5">
-        <h3 className="font-semibold text-[15px] leading-snug line-clamp-1 text-foreground group-hover:text-primary transition-colors duration-300" title={product.title}>
-          {product.title}
-        </h3>
-        
-        <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2">
-          {product.shortDescription}
-        </p>
-        
-        <div className="mt-auto pt-3 flex items-center gap-4 text-xs text-muted-foreground/60">
-          <div className="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span>{product.location}</span>
+    <Link href={`/items/${product.id}`} className="block group">
+      <article className="relative flex flex-col h-full overflow-hidden rounded-3xl bg-card border border-black/[0.04] dark:border-white/[0.06] transition-all duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1),0_0_0_0_rgba(0,0,0,0)] hover:border-black/[0.08] dark:hover:border-white/[0.1] hover:-translate-y-1">
+
+        {/* Image */}
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+          <Image
+            src={product.imageUrl}
+            alt={product.title}
+            fill
+            className="object-cover transition-transform duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          />
+
+          {/* Subtle bottom scrim */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+          {/* Category pill — top left */}
+          <div className="absolute top-3.5 left-3.5">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-white/90 dark:bg-black/60 backdrop-blur-md text-foreground/80 border border-black/[0.06] dark:border-white/[0.08]">
+              {product.category}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-            <span>{product.date}</span>
+
+          {/* Rating pill — top right */}
+          <div className="absolute top-3.5 right-3.5">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold bg-black/35 backdrop-blur-md text-white border border-white/[0.08]">
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              {product.rating.toFixed(1)}
+            </span>
+          </div>
+
+          {/* Wishlist — shows on hover */}
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            className="absolute bottom-3.5 right-3.5 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 dark:bg-white/10 backdrop-blur-md text-foreground/50 hover:text-red-500 border border-black/[0.06] dark:border-white/[0.08] transition-all duration-300 opacity-0 group-hover:opacity-100 translate-y-1.5 group-hover:translate-y-0 z-10"
+            aria-label="Add to wishlist"
+          >
+            <Heart className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col flex-1 p-5 gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-semibold text-[15px] leading-snug line-clamp-1 text-foreground" title={product.title}>
+              {product.title}
+            </h3>
+            <ArrowUpRight className="w-4 h-4 text-foreground/20 group-hover:text-foreground/60 flex-shrink-0 mt-0.5 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </div>
+
+          <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-2">
+            {product.shortDescription}
+          </p>
+
+          {/* Tags row */}
+          <div className="mt-auto pt-1 flex items-center gap-1.5 flex-wrap">
+            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md">
+              ★ {product.rating.toFixed(1)}
+            </span>
+            <span className="text-muted-foreground/30">·</span>
+            <span className="text-[11px] text-muted-foreground">{product.location}</span>
+            <span className="text-muted-foreground/30">·</span>
+            <span className="text-[11px] text-muted-foreground">{product.date}</span>
           </div>
         </div>
-      </CardContent>
-      
-      <CardFooter className="p-5 pt-0 flex items-center justify-between border-t border-border/30">
-        <div className="flex items-baseline gap-0.5">
-          <span className="text-xs text-muted-foreground/60 font-medium">$</span>
-          <span className="text-xl font-bold text-foreground tracking-tight">{product.price.toLocaleString()}</span>
+
+        {/* Footer */}
+        <div className="px-5 pb-5 flex items-center justify-between">
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-lg font-bold tracking-tight text-foreground">
+              ${product.price.toLocaleString()}
+            </span>
+            <span className="text-xs text-muted-foreground font-medium">USD</span>
+          </div>
+
+          <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0">
+            View
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </span>
         </div>
-        <Button asChild variant="default" size="sm" className="rounded-lg shadow-sm font-medium transition-all duration-300 hover:shadow-md hover:scale-[1.03] active:scale-95">
-          <Link href={`/items/${product.id}`}>
-            View Details
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+      </article>
+    </Link>
   );
 }
 
 export function ProductCardSkeleton() {
   return (
-    <Card className="flex flex-col h-full overflow-hidden border border-border/40 bg-card">
+    <div className="overflow-hidden rounded-3xl bg-card border border-black/[0.04] dark:border-white/[0.06]">
       <Skeleton className="w-full aspect-[4/3] rounded-none" />
-      <CardContent className="flex-grow p-5 flex flex-col gap-3">
-        <div className="flex justify-between items-start gap-2">
-          <Skeleton className="h-5 w-2/3" />
-          <Skeleton className="h-5 w-10 rounded-full" />
+      <div className="p-5 flex flex-col gap-3">
+        <Skeleton className="h-5 w-2/3" />
+        <div className="space-y-2">
+          <Skeleton className="h-3.5 w-full" />
+          <Skeleton className="h-3.5 w-4/5" />
         </div>
-        <div className="space-y-2 mt-1">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-4/5" />
+        <div className="mt-auto pt-1 flex gap-2">
+          <Skeleton className="h-4 w-10 rounded-md" />
+          <Skeleton className="h-4 w-14" />
+          <Skeleton className="h-4 w-12" />
         </div>
-        <div className="mt-auto pt-3 space-y-2">
-          <Skeleton className="h-3 w-1/2" />
-          <Skeleton className="h-3 w-1/3" />
-        </div>
-      </CardContent>
-      <CardFooter className="p-5 pt-0 flex items-center justify-between border-t border-border/30">
-        <Skeleton className="h-7 w-16" />
-        <Skeleton className="h-9 w-28 rounded-lg" />
-      </CardFooter>
-    </Card>
+      </div>
+      <div className="px-5 pb-5 flex items-center justify-between">
+        <Skeleton className="h-6 w-16" />
+        <Skeleton className="h-4 w-10" />
+      </div>
+    </div>
   );
 }

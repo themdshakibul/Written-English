@@ -3,6 +3,9 @@ import Item from "@/models/Item";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
+import { Statistics } from "@/components/sections/Statistics";
+import { Categories } from "@/components/sections/Categories";
+import { AnimateInView } from "@/components/shared/AnimateInView";
 import { ProductGrid } from "@/components/shared/ProductGrid";
 import { ProductCard, ProductData } from "@/components/shared/ProductCard";
 import { Button } from "@/components/ui/button";
@@ -95,7 +98,7 @@ export default async function Home() {
         <Hero />
 
         {/* Section 1: Features */}
-        <section className="py-24 bg-muted/30">
+        <AnimateInView as="section" className="py-24 bg-muted/30">
           <Container>
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Platform Features</h2>
@@ -119,29 +122,12 @@ export default async function Home() {
               ))}
             </div>
           </Container>
-        </section>
+        </AnimateInView>
 
-        {/* Section 2: Statistics */}
-        <section className="py-20 bg-primary text-primary-foreground">
-          <Container>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              {[
-                { label: "Active Users", value: "50K+" },
-                { label: "Digital Assets", value: "10,000+" },
-                { label: "Total Volume", value: "$5M+" },
-                { label: "Success Rate", value: "99.9%" },
-              ].map((stat, i) => (
-                <div key={i} className="flex flex-col items-center justify-center p-4">
-                  <span className="text-4xl md:text-5xl font-extrabold mb-2">{stat.value}</span>
-                  <span className="text-sm md:text-base font-medium opacity-80 uppercase tracking-wider">{stat.label}</span>
-                </div>
-              ))}
-            </div>
-          </Container>
-        </section>
+        <Statistics />
 
         {/* Section 3: Trending Assets (Dynamic) */}
-        <section className="py-24 bg-background">
+        <AnimateInView as="section" className="py-24 bg-background">
           <Container>
             <div className="flex flex-col sm:flex-row justify-between items-end mb-12 border-b border-border/50 pb-6">
               <div>
@@ -167,27 +153,17 @@ export default async function Home() {
               <p className="text-center text-muted-foreground py-12">No items available yet.</p>
             )}
           </Container>
-        </section>
+        </AnimateInView>
 
         {/* Section 4: Categories */}
         <section className="py-24 bg-muted/30">
           <Container>
-            <h2 className="text-3xl font-bold tracking-tight text-center mb-12">Browse by Category</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {['SaaS', 'E-commerce', 'Mobile Apps', 'AI Models', 'Web3', 'Design Kits'].map((cat, i) => (
-                <Link key={i} href={`/explore?category=${cat.toLowerCase()}`}>
-                  <div className="bg-background border border-border/50 rounded-xl p-6 text-center hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group">
-                    <div className="h-12 w-12 mx-auto bg-muted rounded-full mb-3 group-hover:bg-primary/10 transition-colors" />
-                    <h4 className="font-medium text-foreground group-hover:text-primary">{cat}</h4>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <Categories />
           </Container>
         </section>
 
         {/* Section 5: Services */}
-        <section className="py-24 bg-background border-t border-border/50">
+        <AnimateInView as="section" className="py-24 bg-background border-t border-border/50">
           <Container className="flex flex-col md:flex-row items-center gap-12">
             <div className="flex-1 space-y-6">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Enterprise Services</h2>
@@ -210,10 +186,10 @@ export default async function Home() {
               <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800" alt="Team working" className="object-cover w-full h-full" />
             </div>
           </Container>
-        </section>
+        </AnimateInView>
 
         {/* Section 6: Testimonials */}
-        <section className="py-24 bg-muted/50">
+        <AnimateInView as="section" className="py-24 bg-muted/50">
           <Container className="text-center">
             <h2 className="text-3xl font-bold tracking-tight mb-16">Trusted by Founders</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -238,10 +214,10 @@ export default async function Home() {
               ))}
             </div>
           </Container>
-        </section>
+        </AnimateInView>
 
         {/* Section 7: Newsletter / CTA */}
-        <section className="py-24 bg-background">
+        <AnimateInView as="section" className="py-24 bg-background">
           <Container className="max-w-4xl text-center bg-primary/5 rounded-3xl p-12 border border-primary/10">
             <Mail className="h-12 w-12 mx-auto text-primary mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Never Miss a Premium Listing</h2>
@@ -257,7 +233,7 @@ export default async function Home() {
               <Button size="lg" className="h-12">Subscribe</Button>
             </div>
           </Container>
-        </section>
+        </AnimateInView>
       </main>
 
       <Footer />

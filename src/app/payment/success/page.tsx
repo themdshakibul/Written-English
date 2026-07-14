@@ -76,7 +76,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
             </div>
 
             <Button asChild className="w-full">
-              <Link href="/dashboard/items/manage">View My Items</Link>
+              <Link href="/dashboard/purchases">View My Purchases</Link>
             </Button>
             <Button variant="outline" asChild className="w-full">
               <Link href="/explore">Continue Exploring</Link>

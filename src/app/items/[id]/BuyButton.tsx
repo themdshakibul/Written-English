@@ -1,12 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth-client";
+import { LogIn } from "lucide-react";
 
 export function BuyButton({ itemId }: { itemId: string }) {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handlePurchase = async () => {
+    if (!session) {
+      router.push(`/login?callbackUrl=/items/${itemId}`);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/create-checkout-session", {
@@ -34,7 +44,16 @@ export function BuyButton({ itemId }: { itemId: string }) {
       onClick={handlePurchase}
       disabled={loading}
     >
-      {loading ? "Redirecting..." : "Purchase & Download"}
+      {!session ? (
+        <>
+          <LogIn className="mr-2 h-4 w-4" />
+          Login to Purchase
+        </>
+      ) : loading ? (
+        "Redirecting..."
+      ) : (
+        "Purchase & Download"
+      )}
     </Button>
   );
 }

@@ -38,30 +38,14 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const loggedOutRoutes = [
+  const publicRoutes = [
     { name: "Explore", path: "/explore" },
     { name: "About Us", path: "/about" },
     { name: "Contact", path: "/contact" },
   ];
 
-  const loggedInRoutes = [
-    { name: "Explore", path: "/explore" },
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "My Items", path: "/items/manage" },
-    { name: "Add Item", path: "/items/add" },
-    { name: "Profile", path: "/profile" },
-  ];
-
-  const navRoutes = isLoggedIn
-    ? [{ name: "Explore", path: "/explore" }]
-    : loggedOutRoutes;
-
-  const mobileRoutes = isLoggedIn
-    ? [
-        { name: "Explore", path: "/explore" },
-        { name: "Dashboard", path: "/dashboard" },
-      ]
-    : loggedOutRoutes;
+  const navRoutes = publicRoutes;
+  const mobileRoutes = publicRoutes;
 
   return (
     <header

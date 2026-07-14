@@ -1,50 +1,58 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Shield, Trash2, ExternalLink, Pencil, Plus } from "lucide-react";
 import { getAllItems, deleteItem } from "@/app/actions/itemActions";
-import { Shield, Trash2, ExternalLink, Package, Pencil, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Container } from "@/components/ui/container";
+import { AlertDialog } from "@/components/ui/alert-dialog";
+import { useEffect, useState } from "react";
 
 export default function AdminItemsPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  const fetchItems = () => {
-    getAllItems().then((data) => {
-      setItems(data);
-      setLoading(false);
-    });
+  const fetchItems = async () => {
+    setLoading(true);
+    const data = await getAllItems();
+    setItems(data);
+    setLoading(false);
   };
 
-  useEffect(() => { fetchItems() }, []);
+  useEffect(() => {
+    fetchItems();
+  }, []);
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Delete this item? This cannot be undone.")) {
-      await deleteItem(id);
-      fetchItems();
-    }
+  const handleDelete = async () => {
+    if (!deleteTargetId) return;
+    await deleteItem(deleteTargetId);
+    setDeleteDialogOpen(false);
+    setDeleteTargetId(null);
+    fetchItems();
   };
 
   return (
     <>
       <div className="border-b border-border bg-background">
         <Container className="py-10">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-sm">
-              <Package className="h-6 w-6 text-white" />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-sm">
+                <Shield className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">All Items</h1>
+                <p className="text-muted-foreground text-sm mt-0.5">Manage all listed digital assets across the platform.</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">All Items</h1>
-              <p className="text-muted-foreground text-sm mt-0.5">Every item on the marketplace. Admins can add, edit, or delete any listing.</p>
-            </div>
-            <Button asChild className="shadow-sm ml-auto">
+            <Button asChild className="shadow-sm">
               <Link href="/dashboard/items/add">
-                <Plus className="mr-2 h-4 w-4" /> Add Item
+                <Plus className="mr-2 h-4 w-4" /> Add New Asset
               </Link>
             </Button>
           </div>
@@ -60,15 +68,24 @@ export default function AdminItemsPage() {
                 <TableHead>Title</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
-                <TableHead>Seller</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date Listed</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={6} className="text-center h-32 text-muted-foreground">Loading...</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
+                    Loading assets...
+                  </TableCell>
+                </TableRow>
               ) : items.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center h-32 text-muted-foreground">No items listed yet.</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
+                    No assets found.
+                  </TableCell>
+                </TableRow>
               ) : (
                 items.map((item) => (
                   <TableRow key={item._id}>
@@ -77,20 +94,50 @@ export default function AdminItemsPage() {
                         <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium max-w-[200px] truncate">{item.title}</TableCell>
-                    <TableCell><Badge variant="secondary">{item.category}</Badge></TableCell>
-                    <TableCell className="font-semibold text-primary">${item.price}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground truncate max-w-[120px]">{item.userId}</TableCell>
+                    <TableCell className="font-medium max-w-[200px] truncate">
+                      {item.title}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{item.category}</Badge>
+                    </TableCell>
+                    <TableCell className="font-semibold text-primary">
+                      ${item.price}
+                    </TableCell>
+                    <TableCell>
+                      {item.status === "pending" ? (
+                        <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-amber-500/20">Pending</Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Approved</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {item.date}
+                    </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end items-center gap-2">
                         <Button variant="outline" size="sm" asChild className="shadow-sm">
-                          <Link href={`/items/${item._id}`}><ExternalLink className="h-4 w-4" /></Link>
+                          <Link href={`/items/${item._id}`}>
+                            <ExternalLink className="h-4 w-4" />
+                            <span className="sr-only">View Details</span>
+                          </Link>
                         </Button>
                         <Button variant="outline" size="sm" asChild className="shadow-sm">
-                          <Link href={`/dashboard/items/edit/${item._id}`}><Pencil className="h-4 w-4" /></Link>
+                          <Link href={`/dashboard/items/edit/${item._id}`}>
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Link>
                         </Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleDelete(item._id)} className="shadow-sm">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            setDeleteTargetId(item._id);
+                            setDeleteDialogOpen(true);
+                          }}
+                          className="shadow-sm"
+                        >
                           <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
                         </Button>
                       </div>
                     </TableCell>
@@ -101,6 +148,15 @@ export default function AdminItemsPage() {
           </Table>
         </div>
       </Container>
+
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Asset"
+        description="Are you sure you want to delete this asset? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+      />
     </>
   );
 }

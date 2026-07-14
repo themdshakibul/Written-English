@@ -10,7 +10,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Github } from "lucide-react";
+import { GitFork } from "lucide-react";
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -73,7 +73,7 @@ export default function RegisterPage() {
                 Google
               </Button>
               <Button variant="outline" className="w-full" onClick={() => console.log("GitHub Login")}>
-                <Github className="mr-2 h-4 w-4" />
+                <GitFork className="mr-2 h-4 w-4" />
                 GitHub
               </Button>
             </div>

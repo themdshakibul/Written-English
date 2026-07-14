@@ -57,7 +57,7 @@ export function SearchFilters() {
       </div>
       
       <div className="flex gap-4 md:w-auto w-full">
-        <Select value={currentCategory} onValueChange={(val) => updateFilters("category", val)}>
+        <Select value={currentCategory} onValueChange={(val) => updateFilters("category", val ?? "all")}>
           <SelectTrigger className="w-[160px] bg-background">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
@@ -70,7 +70,7 @@ export function SearchFilters() {
           </SelectContent>
         </Select>
 
-        <Select value={currentSort} onValueChange={(val) => updateFilters("sort", val)}>
+        <Select value={currentSort} onValueChange={(val) => updateFilters("sort", val ?? "newest")}>
           <SelectTrigger className="w-[160px] bg-background">
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>

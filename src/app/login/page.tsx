@@ -10,7 +10,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Github } from "lucide-react";
+import { GitFork } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -77,7 +77,7 @@ export default function LoginPage() {
                 Google
               </Button>
               <Button variant="outline" className="w-full" onClick={() => console.log("GitHub Login")}>
-                <Github className="mr-2 h-4 w-4" />
+                <GitFork className="mr-2 h-4 w-4" />
                 GitHub
               </Button>
             </div>

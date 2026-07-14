@@ -6,17 +6,29 @@ import { Menu, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useTheme } from "next-themes";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  // Simulating logged-in state. In reality, get this from Better-Auth
-  const isLoggedIn = false;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
+    setIsLoggedIn(document.cookie.includes("auth-token=demo-token"));
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
@@ -38,7 +50,16 @@ export function Navbar() {
     { name: "Profile", path: "/profile" },
   ];
 
-  const routes = isLoggedIn ? loggedInRoutes : loggedOutRoutes;
+  const navRoutes = isLoggedIn
+    ? [{ name: "Explore", path: "/explore" }]
+    : loggedOutRoutes;
+
+  const mobileRoutes = isLoggedIn
+    ? [
+        { name: "Explore", path: "/explore" },
+        { name: "Dashboard", path: "/dashboard" },
+      ]
+    : loggedOutRoutes;
 
   return (
     <header
@@ -58,7 +79,7 @@ export function Navbar() {
           </Link>
           
           <nav className="hidden md:flex gap-6">
-            {routes.map((route) => (
+            {navRoutes.map((route) => (
               <Link
                 key={route.path}
                 href={route.path}
@@ -98,9 +119,39 @@ export function Navbar() {
               </Button>
             </div>
           ) : (
-            <Button variant="outline" size="icon" className="hidden sm:flex rounded-full">
-              <User className="h-5 w-5" />
-            </Button>
+            <div className="relative hidden sm:block" ref={dropdownRef}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <User className="h-5 w-5" />
+              </Button>
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-xl border border-border bg-popover p-1.5 shadow-xl z-50">
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-foreground hover:bg-muted transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  <div className="border-t border-border mt-1 pt-1">
+                    <button
+                      onClick={() => {
+                        document.cookie = "auth-token=; path=/; max-age=0";
+                        setDropdownOpen(false);
+                        window.location.href = "/";
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           <Sheet>
@@ -121,7 +172,7 @@ export function Navbar() {
                 </Link>
                 
                 <div className="flex flex-col space-y-4">
-                  {routes.map((route) => (
+                  {mobileRoutes.map((route) => (
                     <Link
                       key={route.path}
                       href={route.path}
@@ -143,7 +194,14 @@ export function Navbar() {
                       </Button>
                     </>
                   ) : (
-                    <Button variant="destructive" className="w-full justify-center">
+                    <Button
+                      variant="destructive"
+                      className="w-full justify-center"
+                      onClick={() => {
+                        document.cookie = "auth-token=; path=/; max-age=0";
+                        window.location.href = "/";
+                      }}
+                    >
                       Log out
                     </Button>
                   )}

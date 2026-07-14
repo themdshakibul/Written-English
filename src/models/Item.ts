@@ -10,6 +10,7 @@ export interface IItem extends Document {
   imageUrl: string;
   rating: number;
   userId: string;
+  status: string;
 }
 
 const ItemSchema: Schema = new Schema({
@@ -22,6 +23,7 @@ const ItemSchema: Schema = new Schema({
   imageUrl: { type: String, required: true },
   rating: { type: Number, default: 0 },
   userId: { type: String, required: true, default: "demo-user-123" },
+  status: { type: String, default: "pending", enum: ["pending", "approved"] },
 }, { timestamps: true });
 
 export default mongoose.models.Item || mongoose.model<IItem>("Item", ItemSchema);

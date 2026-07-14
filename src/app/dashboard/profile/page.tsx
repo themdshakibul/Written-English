@@ -17,6 +17,8 @@ export default function ProfilePage() {
   const { data: session } = useSession()
   const user = session?.user
   const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "U"
+  const firstName = user?.name?.split(" ")[0] || ""
+  const lastName = user?.name?.split(" ").slice(1).join(" ") || ""
   return (
     <>
       {/* Cover */}
@@ -81,17 +83,17 @@ export default function ProfilePage() {
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium">First Name</label>
-                    <Input defaultValue="John" />
+                    <Input defaultValue={firstName} />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium">Last Name</label>
-                    <Input defaultValue="Doe" />
+                    <Input defaultValue={lastName} />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium">Email</label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input defaultValue="john@example.com" type="email" className="pl-9" />
+                      <Input defaultValue={user?.email || ""} type="email" className="pl-9" />
                     </div>
                   </div>
                   <div className="space-y-1.5">

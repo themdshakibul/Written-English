@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,8 +10,9 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { GitFork } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { signUp } from "@/lib/auth-client";
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -35,13 +35,13 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
     setError("");
-    const { error: signUpError } = await authClient.signUp.email({
+    const { error: signUpError } = await signUp.email({
       name: data.name,
       email: data.email,
       password: data.password,
     });
     if (signUpError) {
-      setError(signUpError.message || signUpError.statusText || "Registration failed");
+      setError(signUpError.message || "Registration failed");
       return;
     }
     router.push("/");
@@ -153,7 +153,9 @@ export default function RegisterPage() {
               </div>
 
               {error && (
-                <p className="text-[0.8rem] font-medium text-destructive text-center">{error}</p>
+                <div className="p-3 rounded-md bg-destructive/10 text-sm text-destructive text-center">
+                  {error}
+                </div>
               )}
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Creating account..." : "Create Account"}

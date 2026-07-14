@@ -12,9 +12,10 @@ import {
 import { getUserItems, deleteItem } from "@/app/actions/itemActions";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Trash2, ExternalLink, Plus, Package } from "lucide-react";
+import { Trash2, ExternalLink, Plus, Package, Pencil } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { Container } from "@/components/ui/container";
 
 export default function ManageItemsPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -41,7 +42,7 @@ export default function ManageItemsPage() {
   return (
     <>
       <div className="border-b border-border bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <Container className="py-10">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm">
@@ -58,10 +59,10 @@ export default function ManageItemsPage() {
               </Link>
             </Button>
           </div>
-        </div>
+        </Container>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <Container className="py-10">
         <div className="border border-border/60 rounded-xl overflow-hidden bg-card shadow-sm">
           <Table>
             <TableHeader className="bg-muted/50">
@@ -70,6 +71,7 @@ export default function ManageItemsPage() {
                 <TableHead>Title</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Date Listed</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -77,13 +79,13 @@ export default function ManageItemsPage() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center h-32 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
                     Loading your assets...
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center h-32 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
                     You haven&apos;t listed any assets yet.
                   </TableCell>
                 </TableRow>
@@ -104,6 +106,13 @@ export default function ManageItemsPage() {
                     <TableCell className="font-semibold text-primary">
                       ${item.price}
                     </TableCell>
+                    <TableCell>
+                      {item.status === "pending" ? (
+                        <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-amber-500/20">Pending</Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Approved</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {item.date}
                     </TableCell>
@@ -113,6 +122,12 @@ export default function ManageItemsPage() {
                           <Link href={`/items/${item._id}`}>
                             <ExternalLink className="h-4 w-4" />
                             <span className="sr-only">View Details</span>
+                          </Link>
+                        </Button>
+                        <Button variant="outline" size="sm" asChild className="shadow-sm">
+                          <Link href={`/dashboard/items/edit/${item._id}`}>
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
                           </Link>
                         </Button>
                         <Button 
@@ -132,7 +147,7 @@ export default function ManageItemsPage() {
             </TableBody>
           </Table>
         </div>
-      </div>
+      </Container>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/profile", "/items/manage", "/items/add"];
+const protectedRoutes = ["/dashboard", "/profile", "/items/manage", "/items/add", "/admin"];
 const authRoutes = ["/login", "/register"];
 const SESSION_COOKIE = "better-auth.session_token";
 

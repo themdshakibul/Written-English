@@ -1,3 +1,5 @@
+import connectToDatabase from "@/lib/mongodb";
+import Item from "@/models/Item";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
@@ -6,9 +8,10 @@ import { ProductCard, ProductData } from "@/components/shared/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ShieldCheck, Zap, Globe, Users, TrendingUp, Star, Mail } from "lucide-react";
+import { Container } from "@/components/ui/container";
+import Link from "next/link";
 
-// Mock Data for the Core Listing section
-const trendingItems: ProductData[] = [
+const fallbackItems: ProductData[] = [
   {
     id: "1",
     title: "SaaS Analytics Dashboard",
@@ -55,7 +58,35 @@ const trendingItems: ProductData[] = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const db = await connectToDatabase();
+  let trendingItems: ProductData[] = [];
+
+  if (db) {
+    const raw = await Item.find({ status: { $ne: "pending" } })
+      .sort({ rating: -1, createdAt: -1 })
+      .limit(4)
+      .lean();
+
+    trendingItems = raw.map((item: Record<string, unknown>) => ({
+      id: String(item._id),
+      title: item.title as string,
+      shortDescription: item.shortDescription as string,
+      price: item.price as number,
+      rating: (item.rating as number) || 0,
+      location: "Global",
+      date: item.createdAt
+        ? `Listed ${Math.floor((Date.now() - new Date(item.createdAt as string).getTime()) / 86400000)}d ago`
+        : "Recently",
+      imageUrl: item.imageUrl as string,
+      category: item.category as string,
+    }));
+  }
+
+  if (trendingItems.length === 0) {
+    trendingItems = fallbackItems;
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -65,7 +96,7 @@ export default function Home() {
 
         {/* Section 1: Features */}
         <section className="py-24 bg-muted/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Container>
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Platform Features</h2>
               <p className="mt-4 text-lg text-muted-foreground">Everything you need to buy and sell premium digital assets.</p>
@@ -87,12 +118,12 @@ export default function Home() {
                 </Card>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
 
         {/* Section 2: Statistics */}
         <section className="py-20 bg-primary text-primary-foreground">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Container>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {[
                 { label: "Active Users", value: "50K+" },
@@ -106,12 +137,12 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
 
-        {/* Section 3: Highlights (Core Listings) */}
+        {/* Section 3: Trending Assets (Dynamic) */}
         <section className="py-24 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Container>
             <div className="flex flex-col sm:flex-row justify-between items-end mb-12 border-b border-border/50 pb-6">
               <div>
                 <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -119,37 +150,45 @@ export default function Home() {
                 </h2>
                 <p className="mt-2 text-muted-foreground">The most sought-after digital properties this week.</p>
               </div>
-              <Button variant="ghost" className="mt-4 sm:mt-0 text-primary hover:text-primary/80">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
+              <Button variant="ghost" asChild className="mt-4 sm:mt-0 text-primary hover:text-primary/80">
+                <Link href="/explore">
+                  View All <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
             
-            <ProductGrid isLoading={false}>
-              {trendingItems.map((item) => (
-                <ProductCard key={item.id} product={item} />
-              ))}
-            </ProductGrid>
-          </div>
+            {trendingItems.length > 0 ? (
+              <ProductGrid isLoading={false}>
+                {trendingItems.map((item) => (
+                  <ProductCard key={item.id} product={item} />
+                ))}
+              </ProductGrid>
+            ) : (
+              <p className="text-center text-muted-foreground py-12">No items available yet.</p>
+            )}
+          </Container>
         </section>
 
         {/* Section 4: Categories */}
         <section className="py-24 bg-muted/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Container>
             <h2 className="text-3xl font-bold tracking-tight text-center mb-12">Browse by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {['SaaS', 'E-commerce', 'Mobile Apps', 'AI Models', 'Web3', 'Design Kits'].map((cat, i) => (
-                <div key={i} className="bg-background border border-border/50 rounded-xl p-6 text-center hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group">
-                  <div className="h-12 w-12 mx-auto bg-muted rounded-full mb-3 group-hover:bg-primary/10 transition-colors" />
-                  <h4 className="font-medium text-foreground group-hover:text-primary">{cat}</h4>
-                </div>
+                <Link key={i} href={`/explore?category=${cat.toLowerCase()}`}>
+                  <div className="bg-background border border-border/50 rounded-xl p-6 text-center hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group">
+                    <div className="h-12 w-12 mx-auto bg-muted rounded-full mb-3 group-hover:bg-primary/10 transition-colors" />
+                    <h4 className="font-medium text-foreground group-hover:text-primary">{cat}</h4>
+                  </div>
+                </Link>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
 
         {/* Section 5: Services */}
         <section className="py-24 bg-background border-t border-border/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
+          <Container className="flex flex-col md:flex-row items-center gap-12">
             <div className="flex-1 space-y-6">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Enterprise Services</h2>
               <p className="text-lg text-muted-foreground">
@@ -168,15 +207,14 @@ export default function Home() {
               <Button size="lg" className="mt-4">Request a Quote</Button>
             </div>
             <div className="flex-1 w-full aspect-square md:aspect-auto md:h-[500px] bg-muted rounded-2xl overflow-hidden relative">
-              {/* Fallback image utilizing unsplash */}
               <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800" alt="Team working" className="object-cover w-full h-full" />
             </div>
-          </div>
+          </Container>
         </section>
 
         {/* Section 6: Testimonials */}
         <section className="py-24 bg-muted/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <Container className="text-center">
             <h2 className="text-3xl font-bold tracking-tight mb-16">Trusted by Founders</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[1, 2, 3].map((_, i) => (
@@ -189,7 +227,7 @@ export default function Home() {
                       {[1, 2, 3, 4, 5].map(s => <Star key={s} className="h-4 w-4 fill-current" />)}
                     </div>
                     <p className="text-muted-foreground italic mb-6">
-                      "Nexus completely transformed how we acquire digital assets. The escrow process was flawless and the codebase quality was exactly as advertised."
+                      &ldquo;Nexus completely transformed how we acquire digital assets. The escrow process was flawless and the codebase quality was exactly as advertised.&rdquo;
                     </p>
                     <div>
                       <p className="font-semibold text-foreground">Sarah Jenkins</p>
@@ -199,12 +237,12 @@ export default function Home() {
                 </Card>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
 
         {/* Section 7: Newsletter / CTA */}
         <section className="py-24 bg-background">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center bg-primary/5 rounded-3xl p-12 border border-primary/10">
+          <Container className="max-w-4xl text-center bg-primary/5 rounded-3xl p-12 border border-primary/10">
             <Mail className="h-12 w-12 mx-auto text-primary mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Never Miss a Premium Listing</h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -218,7 +256,7 @@ export default function Home() {
               />
               <Button size="lg" className="h-12">Subscribe</Button>
             </div>
-          </div>
+          </Container>
         </section>
       </main>
 

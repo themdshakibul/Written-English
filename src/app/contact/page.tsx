@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { useState } from "react";
+import { Container } from "@/components/ui/container";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -22,7 +23,7 @@ export default function ContactPage() {
       <Navbar />
       
       <main className="flex-1 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Container>
           
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Get in Touch</h1>
@@ -118,7 +119,7 @@ export default function ContactPage() {
             </div>
             
           </div>
-        </div>
+        </Container>
       </main>
 
       <Footer />

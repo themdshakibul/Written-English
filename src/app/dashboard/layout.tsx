@@ -3,16 +3,8 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { House, LayoutDashboard, BarChart3, Package, Plus, User, LogOut, Menu, X, ChevronRight } from "lucide-react"
+import { House, LayoutDashboard, BarChart3, Package, Plus, User, LogOut, Menu, X, ChevronRight, ShoppingBag, Shield, Users, Clock } from "lucide-react"
 import { authClient, useSession } from "@/lib/auth-client"
-
-const sidebarLinks = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { label: "My Items", href: "/dashboard/items/manage", icon: Package },
-  { label: "Add Item", href: "/dashboard/items/add", icon: Plus },
-  { label: "Profile", href: "/dashboard/profile", icon: User },
-]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -51,33 +43,84 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shrink-0">
             {user?.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-medium truncate">{user?.name || "User"}</p>
             <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
           </div>
+          {(user as Record<string, unknown>)?.role === "admin" ? (
+            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 shrink-0">
+              Admin
+            </span>
+          ) : (
+            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
+              User
+            </span>
+          )}
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-          {sidebarLinks.map((link) => {
-            const isActive = pathname === link.href
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                <link.icon className="h-5 w-5 shrink-0" />
-                {link.label}
-                {isActive && <ChevronRight className="h-4 w-4 ml-auto" />}
-              </Link>
-            )
-          })}
+          {(user as Record<string, unknown>)?.role === "admin" ? (
+            <>
+              {[
+                { label: "Overview", href: "/dashboard", icon: Shield },
+                { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+                { label: "All Items", href: "/dashboard/admin/items", icon: Package },
+                { label: "My Items", href: "/dashboard/items/manage", icon: LayoutDashboard },
+                { label: "Add Item", href: "/dashboard/items/add", icon: Plus },
+                { label: "Approvals", href: "/dashboard/admin/approvals", icon: Clock },
+                { label: "Purchases", href: "/dashboard/admin/purchases", icon: ShoppingBag },
+                { label: "Users", href: "/dashboard/admin/users", icon: Users },
+                { label: "Profile", href: "/dashboard/profile", icon: User },
+              ].map((link) => {
+                const isActive = pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href + "/"))
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <link.icon className="h-5 w-5 shrink-0" />
+                    {link.label}
+                    {isActive && <ChevronRight className="h-4 w-4 ml-auto" />}
+                  </Link>
+                )
+              })}
+            </>
+          ) : (
+            <>
+              {[
+                { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+                { label: "My Items", href: "/dashboard/items/manage", icon: Package },
+                { label: "Add Item", href: "/dashboard/items/add", icon: Plus },
+                { label: "Purchases", href: "/dashboard/purchases", icon: ShoppingBag },
+                { label: "Profile", href: "/dashboard/profile", icon: User },
+              ].map((link) => {
+                const isActive = pathname === link.href
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <link.icon className="h-5 w-5 shrink-0" />
+                    {link.label}
+                    {isActive && <ChevronRight className="h-4 w-4 ml-auto" />}
+                  </Link>
+                )
+              })}
+            </>
+          )}
         </nav>
 
         {/* User section */}

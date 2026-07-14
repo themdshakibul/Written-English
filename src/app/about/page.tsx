@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Users, Target, Zap, Globe } from "lucide-react";
+import { Container } from "@/components/ui/container";
 
 export default function AboutPage() {
   return (
@@ -8,7 +9,7 @@ export default function AboutPage() {
       <Navbar />
       
       <main className="flex-1 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Container>
           
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">Empowering the Next Generation of Builders</h1>
@@ -65,8 +66,8 @@ export default function AboutPage() {
               ))}
             </div>
           </div>
+        </Container>
 
-        </div>
       </main>
 
       <Footer />

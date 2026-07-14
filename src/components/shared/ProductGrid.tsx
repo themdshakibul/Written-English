@@ -13,7 +13,7 @@ export function ProductGrid({
   skeletonCount = 8 
 }: ProductGridProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl mx-auto py-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 w-full py-6">
       {isLoading 
         ? Array.from({ length: skeletonCount }).map((_, i) => (
             <ProductCardSkeleton key={`skeleton-${i}`} />

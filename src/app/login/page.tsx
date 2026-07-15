@@ -10,9 +10,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { GitFork } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { authClient, signIn } from "@/lib/auth-client";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -20,7 +19,6 @@ const loginSchema = z.object({
 });
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState("");
   
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -33,16 +31,20 @@ export default function LoginPage() {
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     setError("");
-    const { error: signInError } = await authClient.signIn.email({
-      email: data.email,
-      password: data.password,
-    });
-    if (signInError) {
-      setError(signInError.message || signInError.statusText || "Invalid email or password");
-      return;
+    try {
+      const { error: signInError } = await authClient.signIn.email({
+        email: data.email,
+        password: data.password,
+      });
+      if (signInError) {
+        setError(signInError.message || signInError.statusText || "Invalid email or password");
+        return;
+      }
+      // eslint-disable-next-line react-hooks/immutability
+      window.location.href = "/dashboard";
+    } catch {
+      setError("Network error. Please try again.");
     }
-    router.push("/explore");
-    router.refresh();
   };
 
   const handleDemoLogin = () => {
@@ -64,7 +66,7 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="w-full" onClick={() => console.log("Google Login")}>
+              <Button variant="outline" className="w-full" onClick={() => signIn.social({ provider: "google" })}>
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -85,7 +87,7 @@ export default function LoginPage() {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="w-full" onClick={() => console.log("GitHub Login")}>
+              <Button variant="outline" className="w-full" onClick={() => signIn.social({ provider: "github" })}>
                 <GitFork className="mr-2 h-4 w-4" />
                 GitHub
               </Button>

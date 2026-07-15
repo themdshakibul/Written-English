@@ -6,6 +6,7 @@ import Payment from "@/models/Payment";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { ObjectId } from "mongodb";
 
 async function getSession() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -222,12 +223,10 @@ export async function getAllUsers() {
   const _admin = await isAdmin();
   if (!session || !_admin) return [];
 
-  const { MongoClient } = require("mongodb");
-  const client = new MongoClient(process.env.MONGODB_URI!);
-  await client.connect();
-  const db = client.db();
-  const users = await db.collection("user").find({}).toArray();
-  await client.close();
+  const conn = await connectToDatabase();
+  if (!conn) return [];
+
+  const users = await conn.connection.db.collection("user").find({}).toArray();
   return JSON.parse(JSON.stringify(users));
 }
 
@@ -236,15 +235,13 @@ export async function updateUserRole(userId: string, newRole: string) {
   const _admin = await isAdmin();
   if (!session || !_admin) return { success: false, error: "Not authorized" };
 
-  const { MongoClient } = require("mongodb");
-  const client = new MongoClient(process.env.MONGODB_URI!);
-  await client.connect();
-  const db = client.db();
-  await db.collection("user").updateOne(
-    { _id: new (require("mongodb")).ObjectId(userId) },
+  const conn = await connectToDatabase();
+  if (!conn) return { success: false, error: "Database unavailable" };
+
+  await conn.connection.db.collection("user").updateOne(
+    { _id: new ObjectId(userId) },
     { $set: { role: newRole } }
   );
-  await client.close();
   revalidatePath("/dashboard/admin/users");
   return { success: true };
 }

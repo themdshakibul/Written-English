@@ -6,7 +6,7 @@ const protectedRoutes = ["/dashboard", "/profile", "/items/manage", "/items/add"
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const hasSession = request.cookies.has("better-auth.session_token");
+  const hasSession = request.cookies.has("better-auth.session_token") || request.cookies.has("__Secure-better-auth.session_token");
 
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 

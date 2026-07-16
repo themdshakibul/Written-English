@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Neast Frontend
 
-## Getting Started
+Next.js 16.2 + React 19 frontend for the Neast learning platform.
 
-First, run the development server:
+## Tech Stack
+
+- **Framework:** Next.js 16.2 (App Router), React 19
+- **Styling:** Tailwind CSS v4, shadcn/ui (base-nova), HeroUI
+- **Auth:** Better-auth (with MongoDB adapter)
+- **Icons:** Lucide React
+- **Charts:** Recharts
+- **Forms:** React Hook Form + Zod 4
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+# create .env.local:
+#   MONGODB_URI=...
+#   BETTER_AUTH_SECRET=...
+#   BETTER_AUTH_URL=http://localhost:3000
+npm run dev   # port 3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Next.js dev server (port 3000) |
+| `npm run build` | Production build |
+| `npm start` | Run production server |
+| `npm run lint` | ESLint (flat config) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Key Pages
 
-## Learn More
+| Route | Description |
+|-------|-------------|
+| `/` | Home page |
+| `/explore` | Browse courses |
+| `/courses/:id` | Course details |
+| `/items/add` | Create course (auth required) |
+| `/items/manage` | Manage courses (auth required) |
+| `/dashboard` | User dashboard (auth required) |
+| `/profile` | User profile (auth required) |
+| `/admin/*` | Admin panel (role: admin) |
+| `/login` / `/register` | Auth pages |
 
-To learn more about Next.js, take a look at the following resources:
+## Environment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+MONGODB_URI=mongodb://127.0.0.1:27017/neast
+BETTER_AUTH_SECRET=your-secret
+BETTER_AUTH_URL=http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architecture Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Auth**: Better-auth manages sessions directly via MongoDB (no backend auth proxy)
+- **API calls**: Frontend calls backend at `http://localhost:5000/api` for items, admin, stats
+- **Start backend first**, then frontend
